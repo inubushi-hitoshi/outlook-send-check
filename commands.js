@@ -1,5 +1,7 @@
-// 社内ドメイン（これ以外は外部扱い）
-const INTERNAL_DOMAIN = "jasty-bim.com";
+// 社内扱いにするドメイン（これ以外は外部扱い）。複数指定可
+// サブドメイン（例: mail.jasty-bim.com）も社内扱いにしたい場合は INCLUDE_SUBDOMAINS を true に
+const INTERNAL_DOMAINS = ["jasty-bim.com","techno-bridge-nke.co.jp"];
+const INCLUDE_SUBDOMAINS = false;
 const MAX_LEN = 500; // Smart Alertsのメッセージ上限
 
 Office.onReady();
@@ -17,7 +19,12 @@ function isExternal(address) {
   const a = (address || "").trim().toLowerCase();
   const at = a.lastIndexOf("@");
   if (at < 0) return false; // 解決できないアドレスは判定対象外
-  return a.slice(at + 1) !== INTERNAL_DOMAIN;
+  const domain = a.slice(at + 1);
+  const internal = INTERNAL_DOMAINS.some((d) => {
+    d = d.toLowerCase();
+    return domain === d || (INCLUDE_SUBDOMAINS && domain.endsWith("." + d));
+  });
+  return !internal;
 }
 
 function joinLimited(list, limit) {
